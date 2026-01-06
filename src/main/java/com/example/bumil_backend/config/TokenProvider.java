@@ -15,8 +15,8 @@ import java.util.Date;
 public class TokenProvider {
     private final SecretKey key;
 
-    private static final long ACCESS_TOKEN_ABILITY = 1000L * 60 * 60;
-    private static final long REFRESH_TOKEN_ABILITY = 1000L * 60 * 60 * 24 * 7;
+    private static final long ACCESS_TOKEN_ABILITY = 1000L * 60 * 5;
+    private static final long REFRESH_TOKEN_ABILITY = 1000L * 60 * 60 * 24;
 
     public TokenProvider(@Value("${spring.jwt.secret}") String secret) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
