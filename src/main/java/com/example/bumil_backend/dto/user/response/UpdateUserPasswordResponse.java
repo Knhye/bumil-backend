@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @Builder
 public class UpdateUserPasswordResponse {
-    private Long id;
+    private Long userId;
 }
