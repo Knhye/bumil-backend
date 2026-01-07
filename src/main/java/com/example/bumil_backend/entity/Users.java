@@ -32,8 +32,8 @@ public class Users {
     @Column(nullable = false)
     private String name;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private RefreshToken refreshToken;
+    @Column(nullable = false)
+    private Role role;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -45,8 +45,28 @@ public class Users {
     @Builder.Default
     private boolean isDeleted = false;
 
-    @Column(name = "fcm_token")
-    private String fcmToken;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private RefreshToken refreshToken;
+
+    @OneToMany(
+            mappedBy = "user",
+            cascade = {
+                CascadeType.PERSIST,
+                CascadeType.MERGE
+            },
+            fetch = FetchType.LAZY
+    )
+    private ChatRoom chatRoom;
+
+    @OneToMany(
+            mappedBy = "user",
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            },
+            fetch = FetchType.LAZY
+    )
+    private ChatMessage chatMessage;
 
     @PrePersist
     public void prePersist(){
