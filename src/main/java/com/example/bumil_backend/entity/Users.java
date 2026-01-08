@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
 @Getter
 @Setter
@@ -31,10 +32,9 @@ public class Users {
     @Column(nullable = false)
     private String name;
 
-
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
     @Column(nullable = false)

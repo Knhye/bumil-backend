@@ -3,12 +3,13 @@ package com.example.bumil_backend.service;
 import com.example.bumil_backend.common.exception.BadRequestException;
 import com.example.bumil_backend.common.exception.ResourceNotFoundException;
 import com.example.bumil_backend.dto.chat.request.ChatCreateRequest;
+import com.example.bumil_backend.dto.chat.request.ChatCloseRequest;
 import com.example.bumil_backend.dto.chat.response.ChatCreateResponse;
 import com.example.bumil_backend.dto.chat.response.PublicChatListResponse;
 import com.example.bumil_backend.entity.ChatRoom;
-import com.example.bumil_backend.enums.Tag;
 import com.example.bumil_backend.entity.Users;
 import com.example.bumil_backend.enums.DateFilter;
+import com.example.bumil_backend.enums.Tag;
 import com.example.bumil_backend.repository.ChatRoomRepository;
 import com.example.bumil_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -29,6 +29,7 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
 
+    // 채팅방 생성
     public ChatCreateResponse createChat(ChatCreateRequest request) {
 
         Authentication authentication =
@@ -55,35 +56,68 @@ public class ChatService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
-    public List<PublicChatListResponse> getPublicChatList(String dateFilter, String tag) {
+//    @Transactional(readOnly = true)
+//    public List<ChatListResponse> getPublicChatList(String dateFilter, String tag) {
+//
+//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+//        userRepository.findByEmailAndIsDeletedFalse(email)
+//                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 유저입니다."));
+//
+//        // 유효성 검증
+//        validateFilters(dateFilter, tag);
+//
+//        // 정렬 조건
+//        Sort sort = "OLDEST".equals(dateFilter) ? Sort.by("createdAt").ascending() : Sort.by("createdAt").descending();
+//
+//        // String -> Enum
+//        Tag searchTag = (tag != null && !tag.isBlank()) ? Tag.valueOf(tag.toUpperCase()) : null;
+//
+//        List<ChatRoom> chatRooms = chatRoomRepository.findByTag(searchTag, sort);
+//
+//        return chatRooms.stream()
+//                .map(chatRoom -> ChatListResponse.builder()
+//                        .chatRoomId(chatRoom.getId())
+//                        .title(chatRoom.getTitle())
+//                        .tag(chatRoom.getTag().name())
+//                        .createdAt(chatRoom.getCreatedAt())
+//                        .build()
+//                )
+//                .toList();
+//    }
 
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
+    // 채팅방 상태 병경(준비중-> 채택, 반려, 종료)
+//    public void closeChat(ChatCloseRequest request) {
+//
+//        ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
+//                .orElseThrow(() -> new ResourceNotFoundException("채팅방을 찾을 수 없습니다."));
+//
+//        // 이미 처리된 채팅이면 예외
+//        if (chatRoom.getTag() != Tag.IN_PROGRESS) {
+//            throw new BadRequestException("이미 처리된 채팅방입니다.");
+//        }
+//
+//        chatRoom.setTag(request.getTag());
+//    }
 
-        userRepository.findByEmailAndIsDeletedFalse(email)
-                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 유저입니다."));
-
-        if(!dateFilter.matches(Arrays.toString(DateFilter.values())) && !tag.matches(Arrays.toString(Tag.values()))){
-            throw new BadRequestException("올바른 필터링을 입력하세요.");
+    // 필터 검증
+    private void validateFilters(String dateFilter, String tag) {
+        if (dateFilter != null && !isValidEnum(DateFilter.class, dateFilter.toUpperCase())) {
+            throw new BadRequestException("올바른 날짜 필터를 입력하세요.");
         }
 
-        Sort sort = dateFilter.equals("RECENT") ? Sort.by("createdAt").descending() : Sort.by("createdAt").ascending();
-        List<ChatRoom> chatRooms = chatRoomRepository.findByTag(tag, sort);
-
-        if (chatRooms.isEmpty()) {
-            return List.of();   // null 대신 빈 리스트 권장
+        if (tag != null && !tag.isBlank() && !isValidEnum(Tag.class, tag.toUpperCase())) {
+            throw new BadRequestException("올바른 태그를 입력하세요.");
         }
-
-        return chatRooms.stream()
-                .map(chatRoom -> PublicChatListResponse.builder()
-                        .title(chatRoom.getTitle())
-                        .tag(chatRoom.getTag().name())
-                        .createdAt(chatRoom.getCreatedAt())
-                        .build()
-                )
-                .toList();
     }
 
+
+    // Enum 존재 여부 확인
+    private <E extends Enum<E>> boolean isValidEnum(Class<E> enumClass, String value) {
+        try {
+            Enum.valueOf(enumClass, value);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.example.bumil_backend.controller;
 
 import com.example.bumil_backend.common.ApiResponse;
 import com.example.bumil_backend.dto.chat.response.ChatListDto;
+import com.example.bumil_backend.dto.user.request.AdminPasswordUpdateRequest;
 import com.example.bumil_backend.dto.user.request.UserPasswordUpdateRequest;
 import com.example.bumil_backend.dto.user.request.UserUpdateRequest;
 import com.example.bumil_backend.dto.user.response.UpdateUserPasswordResponse;
@@ -35,7 +36,7 @@ public class AdminController {
     @GetMapping("/chats")
     @Operation(summary = "모든 채팅 목록 조회", description = "태그와 날짜정렬로 필터링 할 수 있습니다.")
     public ResponseEntity<ApiResponse<Page<ChatListDto>>> getChats
-            (@RequestParam(required = false) DateFilter dateFilter,
+            (@RequestParam(defaultValue = "RECENT") DateFilter dateFilter,
              @RequestParam(required = false) ChatTags chatTags,
              @RequestParam(required = false) Pageable pageable
             ) {
@@ -54,7 +55,7 @@ public class AdminController {
     @PatchMapping("/password/{userId}")
     @Operation(summary = "회원 비밀번호 변경", description = "회원 비밀번호 변경 시 사용하는 API 입니다.")
     public ResponseEntity<ApiResponse<UpdateUserPasswordResponse>> updateUserPassword
-            (@PathVariable Long userId, @RequestBody UserPasswordUpdateRequest request) {
+            (@PathVariable Long userId, @RequestBody AdminPasswordUpdateRequest request) {
         UpdateUserPasswordResponse result = adminService.updateUserPassword(userId, request);
         return ApiResponse.ok(result, "변경되었습니다.");
     }

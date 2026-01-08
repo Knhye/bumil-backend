@@ -23,11 +23,20 @@ public class ChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Tag tag;
 
     @Column(nullable = false)
     private String title;
+
+    @Column(name = "is_anonymous", nullable = false)
+    @Builder.Default
+    private boolean anonymous = false;
+
+    @Column(name = "is_public", nullable = false)
+    @Builder.Default
+    private boolean isPublic = true;
 
     @Column(nullable = false)
     @Builder.Default
@@ -52,19 +61,23 @@ public class ChatRoom {
     @Builder.Default
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
-
     @PrePersist
-    public void prePersist(){
+    public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
-    public void preUpdate(){
+    public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 
     public void delete() {
         this.isDeleted = true;
+    }
+
+
+    public void setTag(Tag tag) {
+        this.tag = tag;
     }
 }

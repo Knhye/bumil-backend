@@ -3,6 +3,7 @@ package com.example.bumil_backend.service;
 
 import com.example.bumil_backend.common.exception.BadRequestException;
 import com.example.bumil_backend.dto.chat.response.ChatListDto;
+import com.example.bumil_backend.dto.user.request.AdminPasswordUpdateRequest;
 import com.example.bumil_backend.dto.user.request.UserPasswordUpdateRequest;
 import com.example.bumil_backend.dto.user.request.UserUpdateRequest;
 import com.example.bumil_backend.dto.user.response.UpdateUserPasswordResponse;
@@ -55,12 +56,17 @@ public class AdminService {
             case OLDEST -> Sort.by(Sort.Direction.ASC, "createdAt");
         };
 
-        Pageable sortedPageable =
-                PageRequest.of(
-                        pageable.getPageNumber(),
-                        pageable.getPageSize(),
-                        sort
-                );
+        Pageable sortedPageable;
+        if (pageable != null) {
+            sortedPageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    sort
+            );
+        } else {
+            // 기본 페이지 - 0페이지 10개
+            sortedPageable = PageRequest.of(0, 10, sort);
+        }
 
         Page<ChatRoom> chatRooms;
 
@@ -94,15 +100,11 @@ public class AdminService {
 
     // 유저 비밀번호 변경
     @Transactional
-    public UpdateUserPasswordResponse updateUserPassword(Long userId, UserPasswordUpdateRequest request) {
+    public UpdateUserPasswordResponse updateUserPassword(Long userId, AdminPasswordUpdateRequest request) {
         securityUtils.getCurrentAdmin();
 
         Users patchUser = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 유저입니다."));
-
-        if (!passwordEncoder.matches(request.getCurrentPassword(), patchUser.getPassword())) {
-            throw new BadRequestException("현재 비밀번호가 일치하지 않습니다.");
-        }
 
         if (passwordEncoder.matches(request.getNewPassword(), patchUser.getPassword())) {
             throw new BadRequestException("새 비밀번호는 현재 비밀번호와 달라야 합니다.");
@@ -116,4 +118,5 @@ public class AdminService {
                 .userId(patchUser.getId())
                 .build();
     }
+
 }

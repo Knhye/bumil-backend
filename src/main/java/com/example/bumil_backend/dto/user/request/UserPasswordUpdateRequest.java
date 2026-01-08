@@ -1,15 +1,15 @@
 package com.example.bumil_backend.dto.user.request;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
 public class UserPasswordUpdateRequest {
-    @NotNull
+    @NotBlank
     private String currentPassword;
 
-    @NotNull
+    @NotBlank
     private String newPassword;
 }
