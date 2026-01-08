@@ -1,7 +1,5 @@
 package com.example.bumil_backend.config;
 
-import com.example.bumil_backend.common.exception.ChatRoomAccessDeniedException;
-import com.example.bumil_backend.common.exception.ChatRoomNotFoundException;
 import com.example.bumil_backend.common.exception.NotLoggedInException;
 import com.example.bumil_backend.entity.ChatRoom;
 import com.example.bumil_backend.entity.Users;

@@ -1,6 +1,5 @@
 package com.example.bumil_backend.security;
 
-import com.example.bumil_backend.common.exception.AccessDeniedUserException;
 import com.example.bumil_backend.common.exception.NotLoggedInException;
 import com.example.bumil_backend.entity.Users;
 
