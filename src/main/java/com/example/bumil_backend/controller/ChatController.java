@@ -6,7 +6,6 @@ import com.example.bumil_backend.dto.chat.request.ChatCreateRequest;
 import com.example.bumil_backend.dto.chat.request.ChatSettingRequest;
 import com.example.bumil_backend.dto.chat.response.ChatCreateResponse;
 import com.example.bumil_backend.dto.chat.response.ChatListResponse;
-import com.example.bumil_backend.dto.chat.response.PublicChatListResponse;
 import com.example.bumil_backend.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
