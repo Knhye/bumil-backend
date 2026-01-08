@@ -3,24 +3,18 @@ package com.example.bumil_backend.service;
 import com.example.bumil_backend.common.exception.BadRequestException;
 import com.example.bumil_backend.common.exception.ResourceNotFoundException;
 import com.example.bumil_backend.dto.chat.request.ChatCreateRequest;
+import com.example.bumil_backend.dto.chat.request.ChatCloseRequest;
 import com.example.bumil_backend.dto.chat.response.ChatCreateResponse;
-import com.example.bumil_backend.dto.chat.response.PublicChatListResponse;
 import com.example.bumil_backend.entity.ChatRoom;
-import com.example.bumil_backend.entity.DateFilter;
 import com.example.bumil_backend.entity.Tag;
 import com.example.bumil_backend.entity.Users;
 import com.example.bumil_backend.repository.ChatRoomRepository;
 import com.example.bumil_backend.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +24,7 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
 
+    // 채팅방 생성
     public ChatCreateResponse createChat(ChatCreateRequest request) {
 
         Authentication authentication =
@@ -37,7 +32,7 @@ public class ChatService {
 
         String email = authentication.getName(); // JWT sub
 
-        Users user = userRepository.findByEmail(email)
+        Users user = userRepository.findByEmailAndIsDeletedFalse(email)
                 .orElseThrow(() -> new ResourceNotFoundException("유저를 찾을 수 없습니다."));
 
         ChatRoom chatRoom = ChatRoom.builder()
@@ -56,35 +51,17 @@ public class ChatService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
-    public List<PublicChatListResponse> getPublicChatList(String dateFilter, String tag) {
+    // 채팅방 상태 병경(준비중-> 채택, 반려, 종료)
+    public void closeChat(ChatCloseRequest request) {
 
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
+        ChatRoom chatRoom = chatRoomRepository.findById(request.getChatRoomId())
+                .orElseThrow(() -> new ResourceNotFoundException("채팅방을 찾을 수 없습니다."));
 
-        userRepository.findByEmailAndIsDeletedFalse(email)
-                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 유저입니다."));
-
-        if(!dateFilter.matches(Arrays.toString(DateFilter.values())) && !tag.matches(Arrays.toString(Tag.values()))){
-            throw new BadRequestException("올바른 필터링을 입력하세요.");
+        // 이미 처리된 채팅이면 예외
+        if (chatRoom.getTag() != Tag.IN_PROGRESS) {
+            throw new BadRequestException("이미 처리된 채팅방입니다.");
         }
 
-        Sort sort = dateFilter.equals("RECENT") ? Sort.by("createdAt").descending() : Sort.by("createdAt").ascending();
-        List<ChatRoom> chatRooms = chatRoomRepository.findByTag(tag, sort);
-
-        if (chatRooms.isEmpty()) {
-            return List.of();   // null 대신 빈 리스트 권장
-        }
-
-        return chatRooms.stream()
-                .map(chatRoom -> PublicChatListResponse.builder()
-                        .title(chatRoom.getTitle())
-                        .tag(chatRoom.getTag().name())
-                        .createdAt(chatRoom.getCreatedAt())
-                        .build()
-                )
-                .toList();
+        chatRoom.setTag(request.getTag());
     }
-
 }
