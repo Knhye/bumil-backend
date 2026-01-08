@@ -75,8 +75,8 @@ public class ChatRoom {
         this.isDeleted = true;
     }
 
-    public void close(Tag tag){
+
+    public void setTag(Tag tag) {
         this.tag = tag;
-        this.isDeleted = true;
     }
 }
