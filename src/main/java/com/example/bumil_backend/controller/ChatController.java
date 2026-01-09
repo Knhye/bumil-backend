@@ -77,10 +77,9 @@ public class ChatController {
         return ApiResponse.ok(null, "채팅이 삭제되었습니다.");
     }
 
-
-
-
-
-
-
+//    @PatchMapping("/{chatId}")
+//    @Operation(summary = "리액션 설정", description = "공개된 채팅방에 리액션 설정 API")
+//    public ResponseEntity<ApiResponse<ChatReactionResponse>> reaction(@RequestBody @Valid ChatReactionRequest request){
+//        chatService.reaction(request);
+//    }
 }
