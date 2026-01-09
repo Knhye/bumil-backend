@@ -8,6 +8,7 @@ import com.example.bumil_backend.dto.chat.request.ChatCloseRequest;
 import com.example.bumil_backend.dto.chat.request.ChatSettingRequest;
 import com.example.bumil_backend.dto.chat.response.ChatCreateResponse;
 import com.example.bumil_backend.dto.chat.response.ChatListResponse;
+import com.example.bumil_backend.dto.chat.response.PublicChatListResponse;
 import com.example.bumil_backend.entity.ChatRoom;
 import com.example.bumil_backend.entity.DateFilter;
 import com.example.bumil_backend.entity.Users;
@@ -205,5 +206,21 @@ public class ChatService {
         chatRoom.delete();
     }
 
+    @Transactional(readOnly = true)
+    public List<PublicChatListResponse> searchPublicChats(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            throw new BadRequestException("검색어(query)는 필수입니다.");
+        }
+
+        List<ChatRoom> chatRooms = chatRoomRepository.searchPublicChatsByTitle(query.trim());
+
+        return chatRooms.stream()
+                .map(chatRoom -> PublicChatListResponse.builder()
+                        .title(chatRoom.getTitle())
+                        .tag(chatRoom.getTag().name())
+                        .createdAt(chatRoom.getCreatedAt())
+                        .build())
+                .toList();
+    }
 
 }
