@@ -74,7 +74,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("유저가 존재하지 않습니다."));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new BadRequestException("현재 비밀번호가 일치하지 않습니다.");
+            throw new BadRequestException("기존 비밀번호가 일치하지 않습니다.");
         }
 
         if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {

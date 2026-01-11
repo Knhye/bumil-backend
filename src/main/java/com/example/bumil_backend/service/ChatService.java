@@ -3,22 +3,17 @@ package com.example.bumil_backend.service;
 import com.example.bumil_backend.common.exception.BadRequestException;
 import com.example.bumil_backend.common.exception.NotAcceptableUserException;
 import com.example.bumil_backend.common.exception.ResourceNotFoundException;
-import com.example.bumil_backend.dto.chat.response.ChatReactionResponse;
 import com.example.bumil_backend.dto.chat.request.ChatCreateRequest;
 import com.example.bumil_backend.dto.chat.request.ChatCloseRequest;
 import com.example.bumil_backend.dto.chat.request.ChatReactionRequest;
 import com.example.bumil_backend.dto.chat.request.ChatSettingRequest;
-import com.example.bumil_backend.dto.chat.response.ChatCreateResponse;
-import com.example.bumil_backend.dto.chat.response.ChatListResponse;
-import com.example.bumil_backend.dto.chat.response.PublicChatListResponse;
-import com.example.bumil_backend.entity.ChatRoom;
-import com.example.bumil_backend.entity.ChatRoomReaction;
-import com.example.bumil_backend.entity.DateFilter;
-import com.example.bumil_backend.entity.Users;
+import com.example.bumil_backend.dto.chat.response.*;
+import com.example.bumil_backend.entity.*;
 import com.example.bumil_backend.enums.ChatTags;
 import com.example.bumil_backend.enums.ReactionType;
 import com.example.bumil_backend.enums.Role;
 import com.example.bumil_backend.enums.Tag;
+import com.example.bumil_backend.repository.ChatMessageRepository;
 import com.example.bumil_backend.repository.ChatRoomReactionRepository;
 import com.example.bumil_backend.repository.ChatRoomRepository;
 import com.example.bumil_backend.repository.UserRepository;
@@ -43,6 +38,7 @@ public class ChatService {
     private final UserRepository userRepository;
     private final SecurityUtils securityUtils;
     private final ChatRoomReactionRepository chatRoomReactionRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     // 채팅방 생성
     public ChatCreateResponse createChat(ChatCreateRequest request) {
@@ -321,5 +317,38 @@ public class ChatService {
                 .likeCnt(likeCnt)
                 .dislikeCnt(dislikeCnt)
                 .build();
+    }
+
+    public MyChatDetailResponse getMyChatRoom(Long chatRoomId) {
+        Users user = securityUtils.getCurrentUser();
+
+        ChatRoom chatRoom = chatRoomRepository.findByIdAndIsDeletedFalse(chatRoomId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 채팅방을 찾을 수 없습니다."));
+
+        // 작성자 or 관리자
+        boolean isAuthor = chatRoom.getAuthor().getId().equals(user.getId());
+        boolean isAdmin = user.getRole() == Role.ADMIN;
+
+        if (!isAuthor && !isAdmin) {
+            throw new NotAcceptableUserException("해당 채팅방에 대한 권한이 없습니다.");
+        }
+
+        return MyChatDetailResponse.from(chatRoom);
+    }
+
+    @Transactional(readOnly = true)
+    public PublicChatDetailResponse getPublicChatRoom(Long chatRoomId) {
+
+        ChatRoom chatRoom = chatRoomRepository.findByIdAndIsDeletedFalse(chatRoomId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 채팅방을 찾을 수 없습니다."));
+
+        if (!chatRoom.isPublic()) {
+            throw new NotAcceptableUserException("공개된 채팅방이 아닙니다.");
+        }
+
+        List<ChatMessage> messages =
+                chatMessageRepository.findByChatRoomAndIsDeletedFalseOrderByCreatedAtAsc(chatRoom);
+
+        return PublicChatDetailResponse.from(chatRoom, messages);
     }
 }

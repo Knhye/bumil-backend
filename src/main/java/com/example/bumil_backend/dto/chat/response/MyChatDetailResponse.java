@@ -4,15 +4,13 @@ import com.example.bumil_backend.entity.ChatRoom;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @Builder
-public class ChatListDto {
+public class MyChatDetailResponse {
     private Long chatRoomId;
     private String title;
     private String tag;
@@ -20,8 +18,8 @@ public class ChatListDto {
     private int studentNum;
     private LocalDateTime createdAt;
 
-    public static ChatListDto from(ChatRoom chatRoom) {
-        return ChatListDto.builder()
+    public static MyChatDetailResponse from(ChatRoom chatRoom) {
+        return MyChatDetailResponse.builder()
                 .chatRoomId(chatRoom.getId())
                 .title(chatRoom.getTitle())
                 .tag(chatRoom.getTag().toString())
@@ -31,3 +29,4 @@ public class ChatListDto {
                 .build();
     }
 }
+

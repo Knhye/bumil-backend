@@ -1,7 +1,7 @@
 package com.example.bumil_backend.controller;
 
 import com.example.bumil_backend.common.ApiResponse;
-import com.example.bumil_backend.dto.message.MessageListDto;
+import com.example.bumil_backend.dto.message.ChatMessageDto;
 import com.example.bumil_backend.dto.message.MessageRequest;
 import com.example.bumil_backend.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,9 +15,11 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/message")
+@RequestMapping("/api/messages")
 public class MessageController {
     private final MessageService messageService;
 
@@ -73,13 +75,13 @@ public class MessageController {
     }
 
     @GetMapping("/{chatRoomId}")
-    @Operation(summary = "Get messages", description = "채팅방 메시지 목록 조회 API")
-    public ResponseEntity<ApiResponse<MessageListDto>> getMessages
+    @Operation(summary = "Get My messages", description = "내 채팅 메시지 목록 조회 API")
+    public ResponseEntity<ApiResponse<List<ChatMessageDto>>> getMessages
             (@PathVariable Long chatRoomId,
              @RequestParam(required = false) Pageable pageable
-             ) {
-        MessageListDto result = messageService.getMessages(chatRoomId, pageable);
-        return ApiResponse.ok(result, "채팅방 메시지 목록이 조회되었습니다.");
-
+            ) {
+        List<ChatMessageDto> result = messageService.getMessages(chatRoomId, pageable);
+        return ApiResponse.ok(result, "내 채팅 메시지 목록이 조회되었습니다.");
     }
+
 }

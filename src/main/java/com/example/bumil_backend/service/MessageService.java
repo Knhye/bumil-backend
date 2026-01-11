@@ -1,8 +1,8 @@
 package com.example.bumil_backend.service;
 
 import com.example.bumil_backend.common.exception.*;
+
 import com.example.bumil_backend.dto.message.ChatMessageDto;
-import com.example.bumil_backend.dto.message.MessageListDto;
 import com.example.bumil_backend.dto.message.MessageRequest;
 import com.example.bumil_backend.entity.ChatMessage;
 import com.example.bumil_backend.entity.ChatRoom;
@@ -77,7 +77,6 @@ public class MessageService {
         );
     }
 
-
     private Principal resolvePrincipal(SimpMessageHeaderAccessor accessor) {
 
         Principal principal = accessor.getUser();
@@ -94,12 +93,11 @@ public class MessageService {
     }
 
     @Transactional(readOnly = true)
-    public MessageListDto getMessages(Long chatRoomId, Pageable pageable) {
+    public List<ChatMessageDto> getMessages(Long chatRoomId, Pageable pageable) {
         Users user = securityUtils.getCurrentUser();
 
         ChatRoom chatRoom = chatRoomRepository.findByIdAndIsDeletedFalse(chatRoomId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 채팅방을 찾을 수 없습니다."));
-
 
         // 작성자 or 관리자
         boolean isAuthor = chatRoom.getAuthor().getId().equals(user.getId());
@@ -127,8 +125,12 @@ public class MessageService {
                     .getContent();
         }
 
-        return MessageListDto.from(chatRoom, messages);
+        return ChatMessageDto.from(messages);
     }
+
+
+
+
 
 
 

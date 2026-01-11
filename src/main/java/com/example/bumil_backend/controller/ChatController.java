@@ -1,14 +1,11 @@
 package com.example.bumil_backend.controller;
 
 import com.example.bumil_backend.common.ApiResponse;
-import com.example.bumil_backend.dto.chat.response.ChatReactionResponse;
 import com.example.bumil_backend.dto.chat.request.ChatCloseRequest;
 import com.example.bumil_backend.dto.chat.request.ChatCreateRequest;
 import com.example.bumil_backend.dto.chat.request.ChatReactionRequest;
 import com.example.bumil_backend.dto.chat.request.ChatSettingRequest;
-import com.example.bumil_backend.dto.chat.response.ChatCreateResponse;
-import com.example.bumil_backend.dto.chat.response.ChatListResponse;
-import com.example.bumil_backend.dto.chat.response.PublicChatListResponse;
+import com.example.bumil_backend.dto.chat.response.*;
 import com.example.bumil_backend.service.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -97,5 +94,22 @@ public class ChatController {
         ChatReactionResponse response = chatService.reaction(request);
         return ApiResponse.ok(response, "공감 설정이 완료되었습니다.");
     }
+
+    @GetMapping("/{chatRoomId}")
+    @Operation(summary = "공개 채팅 상세조회", description = "공개 채팅 상세조회 API")
+    public ResponseEntity<ApiResponse<PublicChatDetailResponse>> getPublicChatRoom
+            (@PathVariable Long chatRoomId) {
+        PublicChatDetailResponse result = chatService.getPublicChatRoom(chatRoomId);
+        return ApiResponse.ok(result, "공개 채팅이 상세 조회되었습니다.");
+    }
+
+    @GetMapping("/me/{chatRoomId}")
+    @Operation(summary = "내 채팅 상세조회", description = "내 채팅 상세 조회 API")
+    public ResponseEntity<ApiResponse<MyChatDetailResponse>> getMyChatRoom(@PathVariable Long chatRoomId) {
+        MyChatDetailResponse result = chatService.getMyChatRoom(chatRoomId);
+        return ApiResponse.ok(result, "내 채팅이 상세 조회되었습니다.");
+    }
+
+
 
 }
