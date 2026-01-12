@@ -334,6 +334,12 @@ public class ChatService {
 
     @Transactional(readOnly = true)
     public PublicChatDetailResponse getPublicChatRoom(Long chatRoomId) {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        Users user = userRepository.findByEmailAndIsDeletedFalse(email)
+                .orElseThrow(() -> new ResourceNotFoundException("유저를 찾을 수 없습니다."));
 
         ChatRoom chatRoom = chatRoomRepository.findByIdAndIsDeletedFalse(chatRoomId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 채팅방을 찾을 수 없습니다."));
@@ -347,11 +353,18 @@ public class ChatService {
 
         ReactionCount reactionCount = countReactions(chatRoom);
 
+        String myReaction = user.getReactions().stream()
+                .filter(r -> r.getChatRoom().getId().equals(chatRoom.getId()))
+                .map(r -> r.getReactionType().name())
+                .findFirst()
+                .orElse(null);
+
         return PublicChatDetailResponse.from(
                 chatRoom,
                 messages,
                 reactionCount.getLikeCnt(),
-                reactionCount.getDislikeCnt()
+                reactionCount.getDislikeCnt(),
+                myReaction
         );
     }
 

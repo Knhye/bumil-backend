@@ -17,6 +17,7 @@ public class PublicChatDetailResponse {
     private Long chatRoomId;
     private Integer likeCnt;
     private Integer dislikeCnt;
+    private String myReaction;
     private String title;
     private String tag;
     private List<ChatMessageDto> items;
@@ -26,13 +27,15 @@ public class PublicChatDetailResponse {
             ChatRoom chatRoom,
             List<ChatMessage> messages,
             Integer likeCnt,
-            Integer dislikeCnt
+            Integer dislikeCnt,
+            String myReaction
     ) {
         return PublicChatDetailResponse.builder()
                 .chatRoomId(chatRoom.getId())
                 .title(chatRoom.getTitle())
                 .likeCnt(likeCnt)
                 .dislikeCnt(dislikeCnt)
+                .myReaction(myReaction)
                 .tag(chatRoom.getTag().name())
                 .items(
                         ChatMessageDto.from(
