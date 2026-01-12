@@ -1,6 +1,7 @@
 package com.example.bumil_backend.controller;
 
 import com.example.bumil_backend.common.ApiResponse;
+import com.example.bumil_backend.dto.chat.request.UserUpdateForAdminRequest;
 import com.example.bumil_backend.dto.chat.response.ChatListDto;
 import com.example.bumil_backend.dto.user.request.AdminPasswordUpdateRequest;
 import com.example.bumil_backend.dto.user.request.UserPasswordUpdateRequest;
@@ -50,7 +51,7 @@ public class AdminController {
     @PatchMapping("/{userId}")
     @Operation(summary = "회원 정보 수정", description = "회원 정보 시 사용하는 API 입니다.")
     public ResponseEntity<ApiResponse<UserUpdateResponse>> patchUser
-            (@PathVariable Long userId, @RequestBody  UserUpdateRequest request) {
+            (@PathVariable Long userId, @RequestBody UserUpdateForAdminRequest request) {
         UserUpdateResponse result = adminService.patchUser(userId, request);
         return ApiResponse.ok(result, "수정되었습니다.");
     }
